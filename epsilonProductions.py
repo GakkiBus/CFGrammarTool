@@ -22,7 +22,7 @@ def nullDerivables(null, alpha):
 
     nullDrv = nullDerivables(null, alpha[1:])
     if alpha[0] in null:
-        return nullDrv.union(set(map(lambda t: (alpha[0],) + t, nullDrv)))
+        return nullDrv | set(map(lambda t: (alpha[0],) + t, nullDrv))
     else:
         return set(map(lambda t: (alpha[0],) + t, nullDrv))
 
@@ -31,11 +31,11 @@ def removeEpsilonProductions(G):
 
     p = {}
     for lhs, rhss in G.productions.items():
-        r = reduce(lambda a, rhs: a.union(nullDerivables(null, rhs)), rhss, set())
+        r = reduce(lambda a, rhs: a | nullDerivables(null, rhs), rhss, set())
         r.remove(())
         p[lhs] = frozenset(r)
 
     name = CFGrammar.newSymbolName(G.start)
-    n = frozenset([name]).union(G.nonterminals)
+    n = frozenset([name]) | G.nonterminals
     p[name] = frozenset([(G.start,), ()]) if G.start in null else frozenset([(G.start,)])
     return CFGrammar(n, G.terminals, p, name)
