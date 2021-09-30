@@ -1,5 +1,4 @@
 from CFGrammar import CFGrammar
-from epsilonProductions import removeEpsilonProductions
 from functools import reduce
 
 def computeChainProductions(G):
@@ -10,7 +9,7 @@ def computeChainProductions(G):
 
     oldChainProductions = {}
     while chainProductions != oldChainProductions:
-        oldChainProductions = chainProductions
+        oldChainProductions = chainProductions.copy()
         for n, cs in chainProductions.items():
             chainProductions[n] = reduce(lambda a, c: a.union(chainProductions[c]), cs, set())
 
@@ -24,17 +23,3 @@ def removeChainProductions(G):
         p[n] = frozenset([r for r in rules if not (len(r) == 1 and r[0] in G.nonterminals)])
 
     return CFGrammar(G.nonterminals, G.terminals, p, G.start)
-
-G = CFGrammar(
-        frozenset(["A", "B", "C"]), 
-        frozenset(["a", "b"]), 
-        {
-            "A" : frozenset([("a",), ("B",)]),
-            "B" : frozenset([("b", "A"), ()]),
-            "C" : frozenset([("A",)])
-        },
-        "A"
-)
-print(G.productions)
-G_ = removeChainProductions(removeEpsilonProductions(G))
-print(G_.productions)

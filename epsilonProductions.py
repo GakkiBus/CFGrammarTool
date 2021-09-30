@@ -9,7 +9,7 @@ def nullables(G):
 
     oldNull = set()
     while null != oldNull:
-        oldNull = null
+        oldNull = null.copy()
         for lhs, rhss in G.productions.items():
             if any(set(rhs).issubset(null) for rhs in rhss):
                 null.add(lhs)
