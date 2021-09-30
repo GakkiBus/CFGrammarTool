@@ -1,6 +1,6 @@
 from CFGrammar import CFGrammar
 
-def computeReachableProductions(G):
+def computeReachableNonterminals(G):
     reachable = {G.start}
 
     oldReachable = set()
@@ -13,8 +13,8 @@ def computeReachableProductions(G):
                         if a in G.nonterminals}
     return reachable
 
-def removeUnreachableProductions(G):
-    n = frozenset(computeReachableProductions(G))
+def removeUnreachableNonterminals(G):
+    n = frozenset(computeReachableNonterminals(G))
     p = {lhs: rhss for (lhs, rhss) in G.productions.items() if lhs in n}
     return CFGrammar(n, G.terminals, p, G.start)
 
@@ -29,4 +29,4 @@ G = CFGrammar(
         "A"
 )
 
-print(removeUnreachableProductions(G).productions)
+print(removeUnreachableNonterminals(G).productions)
