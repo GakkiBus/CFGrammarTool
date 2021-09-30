@@ -17,16 +17,3 @@ def removeUnreachableNonterminals(G):
     n = frozenset(computeReachableNonterminals(G))
     p = {lhs: rhss for (lhs, rhss) in G.productions.items() if lhs in n}
     return CFGrammar(n, G.terminals, p, G.start)
-
-G = CFGrammar(
-        frozenset(["A", "B", "C"]), 
-        frozenset(["a", "b"]), 
-        {
-            "A" : frozenset([("a",), ("B",)]),
-            "B" : frozenset([("b", "A"), ()]),
-            "C" : frozenset([("A",)])
-        },
-        "A"
-)
-
-print(removeUnreachableNonterminals(G).productions)
