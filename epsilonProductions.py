@@ -31,9 +31,8 @@ def removeEpsilonProductions(G):
 
     p = {}
     for lhs, rhss in G.productions.items():
-        r = reduce(lambda a, rhs: a | nullDerivables(null, rhs), rhss, set())
-        r.remove(())
-        p[lhs] = frozenset(r)
+        r = reduce(lambda a, rhs: a | nullDerivables(null, rhs), rhss, frozenset())
+        p[lhs] = r - {()}
 
     name = CFGrammar.newSymbolName(G.start)
     n = frozenset([name]) | G.nonterminals
