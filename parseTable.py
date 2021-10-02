@@ -13,9 +13,9 @@ def computeFirstSetRelations(G):
 
 def addToFirstSet(alpha, firstSets):
     if alpha == ():
-        return frozenset("")
+        return frozenset(("",))
     elif "" in firstSets[alpha[0]]:
-        return (firstSets[alpha[0]] - frozenset("")) | addToFirstSet(alpha[1:], firstSets)
+        return (firstSets[alpha[0]] - frozenset(("",))) | addToFirstSet(alpha[1:], firstSets)
     else:
         return firstSets[alpha[0]]
         
@@ -29,3 +29,29 @@ def computeFirstSets(G):
 
     return firstSets
 
+def computeFollowSetRelations(G):
+    followSets = {n : frozenset() for n in G.nonterminals}
+    relations = {n : frozenset() for n in G.nonterminals}
+    firstSets = computeFirstSets(G)
+
+    for lhs, rhss in G.productions.items():
+        for rhs in rhss:
+            for i in range(len(rhs)):
+                if rhs[i] in G.nonterminals:
+                    f = addToFirstSet(rhs[i+1:], firstSets)
+                    followSets[rhs[i]] |= f - frozenset(("",))
+                    if "" in f:
+                        relations[rhs[i]] |= frozenset(lhs)
+
+    followSets[G.start] |= frozenset("$")
+    return followSets, relations
+
+def computeFollowSets(G):
+    followSets, relations = computeFollowSetRelations(G)
+    oldFollowSets = {}
+    while followSets != oldFollowSets:
+        oldFollowSets = followSets.copy()
+        for n, rs in relations.items():
+            followSets[n] |= reduce(lambda a, b: a | followSets[b], rs, frozenset())
+
+    return followSets
