@@ -7,15 +7,15 @@ def computeFirstSetRelations(G):
     for n in G.nonterminals:
         relations[n] = frozenset([rhs for rhs in G.productions[n] 
                                          if len(rhs) > 0 and rhs[0] in G.nonterminals])
-        firstSets[n] = frozenset(map(lambda a: a[:1], G.productions[n] - relations[n]))
+        firstSets[n] = frozenset(map(lambda a: "" if a == () else a[0], G.productions[n] - relations[n]))
 
     return firstSets, relations
 
-def addToFirstSet(alpha, firstSets):
+def firstSetWord(alpha, firstSets):
     if alpha == ():
         return frozenset(("",))
     elif "" in firstSets[alpha[0]]:
-        return (firstSets[alpha[0]] - frozenset(("",))) | addToFirstSet(alpha[1:], firstSets)
+        return (firstSets[alpha[0]] - frozenset(("",))) | firstSetWord(alpha[1:], firstSets)
     else:
         return firstSets[alpha[0]]
         
@@ -25,7 +25,7 @@ def computeFirstSets(G):
     while firstSets != oldFirstSets:
         oldFirstSets = firstSets.copy()
         for n, rs in relations.items():
-            firstSets[n] |= reduce(lambda a, b: a | addToFirstSet(b, firstSets), rs, frozenset())
+            firstSets[n] |= reduce(lambda a, b: a | firstSetWord(b, firstSets), rs, frozenset())
 
     return firstSets
 
@@ -38,7 +38,7 @@ def computeFollowSetRelations(G):
         for rhs in rhss:
             for i in range(len(rhs)):
                 if rhs[i] in G.nonterminals:
-                    f = addToFirstSet(rhs[i+1:], firstSets)
+                    f = firstSetWord(rhs[i+1:], firstSets)
                     followSets[rhs[i]] |= f - frozenset(("",))
                     if "" in f:
                         relations[rhs[i]] |= frozenset(lhs)
@@ -55,3 +55,19 @@ def computeFollowSets(G):
             followSets[n] |= reduce(lambda a, b: a | followSets[b], rs, frozenset())
 
     return followSets
+
+def computeParseTable(G):
+    parseTable = {(A, a) : frozenset() for A in G.nonterminals for a in (G.terminals | frozenset("$"))}
+    firstSets = computeFirstSets(G)
+    followSets = computeFollowSets(G)
+
+    for lhs, rhss in G.productions.items():
+        for rhs in rhss:
+            f = firstSetWord(rhs, firstSets)
+            for a in (G.terminals & f):
+                parseTable[lhs, a] |= frozenset(((lhs, rhs),))
+            if "" in f:
+                for a in followSets[lhs]:
+                    parseTable[lhs, a] |= frozenset(((lhs, rhs),))
+
+    return parseTable
