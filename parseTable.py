@@ -41,7 +41,7 @@ def computeFollowSetRelations(G):
                     f = firstSetWord(rhs[i+1:], firstSets)
                     followSets[rhs[i]] |= f - frozenset(("",))
                     if "" in f:
-                        relations[rhs[i]] |= frozenset(lhs)
+                        relations[rhs[i]] |= frozenset((lhs,))
 
     followSets[G.start] |= frozenset("$")
     return followSets, relations

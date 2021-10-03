@@ -1,19 +1,18 @@
 from CFGrammar import CFGrammar
 
 def computeReachableNonterminals(G):
-    reachable = {G.start}
+    reachable = frozenset((G.start,))
 
-    oldReachable = set()
+    oldReachable = frozenset()
     while reachable != oldReachable:
-        oldReachable = reachable.copy()
+        oldReachable = reachable
         reachable |= {a for n in reachable
-                        for rhss in G.productions[n] 
-                        for rhs in rhss
+                        for rhs in G.productions[n] 
                         for a in rhs
                         if a in G.nonterminals}
     return reachable
 
 def removeUnreachableNonterminals(G):
-    n = frozenset(computeReachableNonterminals(G))
+    n = computeReachableNonterminals(G)
     p = {lhs: rhss for (lhs, rhss) in G.productions.items() if lhs in n}
     return CFGrammar(n, G.terminals, p, G.start)

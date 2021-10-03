@@ -16,7 +16,6 @@ def eliminateLeftRecursion(G):
 
     while len(deq) > 0:
         n = deq.popleft()
-        print(n)
         if n in p.keys():
             R = p[n]
             oldR = frozenset()
